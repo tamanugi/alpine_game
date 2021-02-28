@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine GAME</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <style>
+        .row {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div x-data="data()" x-init="start()">
+        <template x-for="(row, index) in board">
+            <div class="row">
+                <template x-for="(cell, idx) in row">
+                    <div x-text="cell"></div>
+                </template>
+            </div>
+        </template>
+    </div>
+    <script>
+        const data = () => ({
+                board: [
+                    [1, 1, 0, 0, 0],
+                    [1, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 1],
+                ],
+                start() {
+                    setInterval(() => {this.update()}, 1000)
+                },
+                update() {
+                    const nextBoard = [...this.board];
+                    for (let i = 0; i < 5; i++) {
+                        for (let j = 0; j < 5; j++) {
+                            const cell = this.board[i][j];
+                            const liveCnt = around(this.board, i, j)
+                            if (cell === 0) {
+                                // 誕生
+                                if (liveCnt === 3) {
+                                    nextBoard[i][j] = 1;
+                                }
+                            } else if (liveCnt <= 1 || liveCnt >= 4) {
+                                nextBoard[i][j] = 0;
+                            }
+                        }
+                    }
+
+                    this.board = nextBoard
+
+                }
+            })
+
+
+        function around(board, i, j) {
+
+            let cnt = 0;
+            for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) {
+                    continue;
+                }
+
+                let row = board[i + dy];
+                if (!row) {
+                    continue;
+                }
+
+                cnt += row[j + dy] || 0
+            } 
+            }
+
+            return cnt;
+        }
+    </script>
+</body>
+</html>
