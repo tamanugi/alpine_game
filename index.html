@@ -8,58 +8,124 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
     <style>
+        .container {
+            margin-top: 10px;
+            display: flex;
+        }
+
         .row {
             display: flex;
+        }
+
+        .cell {
+            width: 15px;
+            height: 15px;
+            border: 1px solid #dddddd;
+        }
+
+        .live {
+            background-color: black;
+        }
+
+        .dead {
+            background-color: white;
+        }
+
+        .info {
+            margin-left: 20px;
         }
     </style>
 </head>
 <body>
-    <div x-data="data()" x-init="start()">
-        <template x-for="(row, index) in board">
-            <div class="row">
-                <template x-for="(cell, idx) in row">
-                    <div x-text="cell"></div>
-                </template>
-            </div>
-        </template>
+    <h2>LIFE GAME with Alpine.js</h2>
+    <div class="description">
+        <a href="https://github.com/alpinejs/alpine">Alpine.js</a>で実装したライフゲームです。<br>
+        盤面をクリックすると生死を切り替えることができます。(停止中のみ)<br>
+        スタートボタンをクリックするとスタートします。
+    </div>
+    <div class="container" x-data="data()" x-init="init()">
+        <div class="board">
+            <template x-for="(row, index) in board">
+                <div class="row">
+                    <template x-for="(cell, idx) in row">
+                        <div class="cell" x-on:click="toggle(index, idx)"
+                        x-bind:class="{ 'live': !!cell, 'dead': !cell }"></div>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div class="info">
+            <button x-show="state == 'STOP'" x-on:click="start()">スタート</button>
+            <button x-show="state == 'START'" x-on:click="stop()">ストップ</button>
+            <button x-show="state == 'STOP'" x-on:click="randomBoard()">ランダム</button>
+            <div>世代数: <span x-text="generation"></span> </div>
+        </div>
     </div>
     <script>
         const data = () => ({
-                board: [
-                    [1, 1, 0, 0, 0],
-                    [1, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 0],
-                    [0, 0, 1, 0, 0],
-                    [0, 0, 0, 0, 1],
-                ],
-                start() {
-                    setInterval(() => {this.update()}, 1000)
-                },
-                update() {
-                    const nextBoard = [...this.board];
-                    for (let i = 0; i < 5; i++) {
-                        for (let j = 0; j < 5; j++) {
-                            const cell = this.board[i][j];
-                            const liveCnt = around(this.board, i, j)
-                            if (cell === 0) {
-                                // 誕生
-                                if (liveCnt === 3) {
-                                    nextBoard[i][j] = 1;
-                                }
-                            } else if (liveCnt <= 1 || liveCnt >= 4) {
-                                nextBoard[i][j] = 0;
-                            }
+            w: 20, 
+            h: 20,
+            generation: 0,
+            board: [],
+            state: 'STOP', // START or STOP
+            timerId: null,
+            init() {
+                // this.board = this.randomBoard(this.h, this.w)
+                this.board = Array(this.h).fill(0).map(v => Array(this.w).fill(v))
+            },
+            start() {
+                this.state = 'START';
+                this.timerId = setInterval(() => {this.update()}, 300);
+            },
+            stop() {
+                this.state = 'STOP';
+                clearInterval(this.timerId)
+            },
+            randomBoard() {
+                let board = [];
+                for (let i = 0; i < this.h; i++) {
+                    let row = [];
+                    for (let j = 0; j < this.w; j++) {
+                        row.push( Math.floor(Math.random() * 1000) % 2);
+                    }
+                    board.push(row);
+                }
+
+                this.board = board;
+            },
+            update() {
+                const nextBoard = [];
+                for (let i = 0; i < this.h; i++) {
+                    let row = [];
+                    for (let j = 0; j < this.w; j++) {
+                        const cell = this.board[i][j];
+                        const liveCnt = around(this.board, i, j)
+                        if (cell === 0 && liveCnt == 3) {
+                            // 誕生
+                            row.push(1);
+                        } else if (cell == 1 && (liveCnt <= 1 || liveCnt >= 4)) {
+                            // 死(過密 or 過疎)
+                            row.push(0);
+                        } else {
+                            // 維持
+                            row.push(cell);
                         }
                     }
-
-                    this.board = nextBoard
-
+                    nextBoard.push(row);
                 }
-            })
+
+                this.board = nextBoard;
+                this.generation++;
+            },
+            toggle(i, j) {
+                if (this.state === 'STOP') {
+                    this.board[i][j] = 1 - this.board[i][j]
+                }
+            }
+        })
 
 
         function around(board, i, j) {
-
             let cnt = 0;
             for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -72,7 +138,7 @@
                     continue;
                 }
 
-                cnt += row[j + dy] || 0
+                cnt += row[j + dx] || 0
             } 
             }
 
