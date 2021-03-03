@@ -75,7 +75,7 @@
             },
             start() {
                 this.state = 'START';
-                this.timerId = setInterval(() => {this.update()}, 300);
+                this.timerId = setInterval(() => { this.update() }, 300);
             },
             stop() {
                 this.state = 'STOP';
@@ -86,7 +86,7 @@
                 for (let i = 0; i < this.h; i++) {
                     const row = [];
                     for (let j = 0; j < this.w; j++) {
-                        row.push( Math.floor(Math.random() * 1000) % 2);
+                        row.push(Math.floor(Math.random() * 2));
                     }
                     board.push(row);
                 }
