@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width">
     <title>Alpine GAME</title>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
@@ -61,7 +61,7 @@
             <div>世代数: <span x-text="generation"></span> </div>
         </div>
     </div>
-    <script>
+    <script>"use strict";
         const data = () => ({
             w: 20, 
             h: 20,
@@ -82,9 +82,9 @@
                 clearInterval(this.timerId)
             },
             randomBoard() {
-                let board = [];
+                const board = [];
                 for (let i = 0; i < this.h; i++) {
-                    let row = [];
+                    const row = [];
                     for (let j = 0; j < this.w; j++) {
                         row.push( Math.floor(Math.random() * 1000) % 2);
                     }
@@ -96,7 +96,7 @@
             update() {
                 const nextBoard = [];
                 for (let i = 0; i < this.h; i++) {
-                    let row = [];
+                    const row = [];
                     for (let j = 0; j < this.w; j++) {
                         const cell = this.board[i][j];
                         const liveCnt = around(this.board, i, j)
@@ -122,24 +122,24 @@
                     this.board[i][j] = 1 - this.board[i][j]
                 }
             }
-        })
+        });
 
 
         function around(board, i, j) {
             let cnt = 0;
             for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-                if (dx == 0 && dy == 0) {
-                    continue;
-                }
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx == 0 && dy == 0) {
+                        continue;
+                    }
 
-                let row = board[i + dy];
-                if (!row) {
-                    continue;
-                }
+                    const row = board[i + dy];
+                    if (!row) {
+                        continue;
+                    }
 
-                cnt += row[j + dx] || 0
-            } 
+                    cnt += row[j + dx] || 0
+                } 
             }
 
             return cnt;
